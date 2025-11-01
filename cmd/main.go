@@ -7,42 +7,40 @@ import (
 	"sync"
 
 	"github.com/csibe1999/go-barion/pkg/barion"
+	"github.com/csibe1999/go-barion/pkg/barion/callback"
+	paymentstate "github.com/csibe1999/go-barion/pkg/barion/payment_state"
+	startpayment "github.com/csibe1999/go-barion/pkg/barion/start_payment"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/joho/godotenv"
-	"github.com/namsral/flag"
 	"github.com/shopspring/decimal"
 )
 
 func main() {
-	var (
-		baseURL string
-		posKey  string
-	)
-
-	flag.StringVar(&baseURL, "baseurl", "https://api.test.barion.com/v2", "Barion API base URL")
-	flag.Parse()
 
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
 
-	posKey = os.Getenv("BARION_POS_KEY")
+	posKey := os.Getenv("BARION_POS_KEY")
+	baseUrl := os.Getenv("BARION_BASE_URL")
 	platformEmail := os.Getenv("PLATFORM_EMAIL")
 	merchantEmail := os.Getenv("MERCHANT_EMAIL")
 	buyerEmail := os.Getenv("BUYER_EMAIL")
 	callbackURL := os.Getenv("CALLBACK_URL")
 
-	client := barion.NewClient(baseURL, posKey)
-	client.SetLogger(log.Print)
+	barion.POSKey = posKey
+	barion.BaseUrl = baseUrl
+	barion.CallbackUrl = callbackURL
 
 	router := chi.NewRouter()
 	router.Use(middleware.RequestID)
 	router.Use(middleware.RealIP)
 	router.Use(middleware.Recoverer)
-	router.Post("/callback", client.CallbackHandler(func(state *barion.PaymentState) {
+
+	router.Post("/callback", callback.New(func(state *barion.PaymentState) {
 		log.Printf("PaymentState callback result: %v", state)
 	}))
 	router.Get("/health", func(w http.ResponseWriter, r *http.Request) {
@@ -60,7 +58,7 @@ func main() {
 		}
 	}()
 
-	payment := barion.PaymentRequest{
+	payment := &barion.PaymentRequest{
 		POSKey:           posKey,
 		PaymentType:      barion.Immediate,
 		GuestCheckout:    true,
@@ -100,14 +98,14 @@ func main() {
 	}
 	_ = payment
 
-	response, err := client.StartPayment(&payment)
+	response, err := startpayment.New(payment)
 	if err != nil {
 		log.Fatal(spew.Sdump(err))
 	}
 	spew.Dump(response)
 	log.Println(response.PaymentID)
 
-	paymentState, err := client.GetPaymentState(response.PaymentID)
+	paymentState, err := paymentstate.New(response.PaymentID)
 	if err != nil {
 		log.Fatal(spew.Sdump(err))
 	}
