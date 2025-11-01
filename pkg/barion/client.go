@@ -1,7 +1,6 @@
 package barion
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -32,7 +31,7 @@ func (c *Client) SetLogger(logger logger) {
 	c.logger = logger
 }
 
-func (c *Client) StartPayment(ctx context.Context, request *PaymentRequest) (*PaymentRequestResponse, error) {
+func (c *Client) StartPayment(request *PaymentRequest) (*PaymentRequestResponse, error) {
 	url := c.baseUrl + "/v2/Payment/Start"
 	request.POSKey = c.postKey
 
@@ -42,7 +41,6 @@ func (c *Client) StartPayment(ctx context.Context, request *PaymentRequest) (*Pa
 	}
 
 	req := c.r.R()
-	req.SetContext(ctx)
 	req.SetHeader("Content-Type", "application/json")
 	req.SetBody(body)
 	req.SetResult(&PaymentRequestResponse{})
@@ -63,10 +61,9 @@ func (c *Client) StartPayment(ctx context.Context, request *PaymentRequest) (*Pa
 	return res.Result().(*PaymentRequestResponse), nil
 }
 
-func (c *Client) GetPaymentState(ctx context.Context, PaymentId string) (*PaymentState, error) {
+func (c *Client) GetPaymentState(PaymentId string) (*PaymentState, error) {
 	url := c.baseUrl + fmt.Sprintf("/v4/payment/%s/paymentstate", PaymentId)
 	req := c.r.R()
-	req.SetContext(ctx)
 	req.SetHeader("Content-Type", "application/json")
 	req.SetQueryParam("POSKey", c.postKey)
 	req.SetQueryParam("PaymentId", PaymentId)

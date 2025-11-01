@@ -1,7 +1,6 @@
 package barion
 
 import (
-	"context"
 	"log"
 	"net/http"
 )
@@ -18,7 +17,7 @@ func (c *Client) CallbackHandler(paymentStateHandler func(state *PaymentState)) 
 
 		key := keys[0]
 
-		state, err := c.GetPaymentState(context.TODO(), key)
+		state, err := c.GetPaymentState(key)
 		if err != nil {
 			log.Println(err)
 			http.Error(w, "", http.StatusInternalServerError)

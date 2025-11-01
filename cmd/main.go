@@ -1,8 +1,6 @@
 package main
 
 import (
-	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -102,20 +100,17 @@ func main() {
 	}
 	_ = payment
 
-	response, err := client.StartPayment(context.TODO(), &payment)
+	response, err := client.StartPayment(&payment)
 	if err != nil {
 		log.Fatal(spew.Sdump(err))
 	}
 	spew.Dump(response)
-	fmt.Println("????????????????????")
 	log.Println(response.PaymentID)
-	fmt.Println("????????????????????")
 
-	paymentState, err := client.GetPaymentState(context.TODO(), response.PaymentID)
+	paymentState, err := client.GetPaymentState(response.PaymentID)
 	if err != nil {
 		log.Fatal(spew.Sdump(err))
 	}
-	fmt.Println("????????????????????")
 	spew.Dump(paymentState)
 
 	wg.Wait()
