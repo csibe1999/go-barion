@@ -4,15 +4,15 @@ package barion
 type PaymentStatus int
 
 const (
-	Prepared PaymentStatus = iota
-	Started
-	InProgress
-	Waiting
-	Reserved
-	Authorized
-	Canceled
-	Succeeded
-	Failed
-	PartiallySucceeded
-	Expired
+	Prepared           PaymentStatus = 10
+	Started            PaymentStatus = 20
+	InProgress         PaymentStatus = 21
+	Waiting            PaymentStatus = 22
+	Reserved           PaymentStatus = 25
+	Authorized         PaymentStatus = 26
+	Canceled           PaymentStatus = 30
+	Succeeded          PaymentStatus = 40
+	Failed             PaymentStatus = 50
+	PartiallySucceeded PaymentStatus = 60
+	Expired            PaymentStatus = 70
 )

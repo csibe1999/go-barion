@@ -19,7 +19,7 @@ type client struct {
 }
 
 func NewClient(baseurl string, poskey string, r *resty.Client) *client {
-	r.SetHeader("User-Agent", "github.com/miklosn/go-barion")
+	r.SetHeader("User-Agent", "github.com/csibe1999/go-barion")
 	return &client{
 		r:       r,
 		baseurl: baseurl,
@@ -32,7 +32,7 @@ func (c *client) SetLogger(logger logger) {
 	c.logger = logger
 }
 
-func (c *client) PaymentRequest(ctx context.Context, request *PaymentRequest) (*PaymentRequestResponse, error) {
+func (c *client) StartPayment(ctx context.Context, request *PaymentRequest) (*PaymentRequestResponse, error) {
 	url := c.baseurl + "/Payment/Start"
 	request.POSKey = c.poskey
 	request.CallbackURL = "https://root-2c3992af.localhost.run/callback"

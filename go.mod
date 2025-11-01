@@ -1,4 +1,4 @@
-module github.com/miklosn/go-barion
+module github.com/csibe1999/go-barion
 
 go 1.14
 

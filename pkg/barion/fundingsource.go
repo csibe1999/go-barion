@@ -1,11 +1,13 @@
 package barion
 
 //go:generate enumer -type=FundingSource -json
-type FundingSource int
+type FundingSources int
 
 const (
-	All FundingSource = iota
+	All FundingSources = iota
 	Balance
 	BankCard
+	GooglePay
+	ApplePay
 	BankTransfer
 )

@@ -31,7 +31,7 @@ func TestPaymentRequestError(t *testing.T) {
 		`)
 	response.Header.Set("content-type", "application/json")
 	httpmock.RegisterResponder("POST", "http://localhost/Payment/Start", httpmock.ResponderFromResponse(response))
-	res, err := client.PaymentRequest(context.Background(), &PaymentRequest{})
+	 res, err := client.StartPayment(context.Background(), &PaymentRequest{})
 	if err == nil {
 		t.Fatalf("Should be err")
 	}
@@ -72,7 +72,7 @@ func TestPaymentRequestSuccess(t *testing.T) {
 		`)
 	response.Header.Set("content-type", "application/json")
 	httpmock.RegisterResponder("POST", "http://localhost/Payment/Start", httpmock.ResponderFromResponse(response))
-	res, err := client.PaymentRequest(context.Background(), &PaymentRequest{})
+	 res, err := client.StartPayment(context.Background(), &PaymentRequest{})
 	if err != nil {
 		t.Fatalf("Should not be err")
 	}

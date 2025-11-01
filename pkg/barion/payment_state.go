@@ -11,52 +11,78 @@ type paymentStateRequest struct {
 	PaymentID string `json:"PaymentId"`
 }
 
-//go:generate enumer -type=CardType -json
 type CardType int
 
 const (
-	Unknown CardType = iota
-	MasterCard
-	Visa
-	AmericanExpress
-	Electron
-	Maestro
+	CardTypeUnknown         CardType = 0
+	CardTypeMasterCard      CardType = 10
+	CardTypeVisa            CardType = 20
+	CardTypeAmericanExpress CardType = 30
+	CardTypeElectron        CardType = 40
+	CardTypeMaestro         CardType = 50
+	CardTypeDinersClub      CardType = 70
+	CardTypeDiscover        CardType = 80
 )
 
-type BankCardType struct {
-	MaskedPan      string
-	BankCardType   CardType
-	ValidThruYear  string
-	ValidThruMonth string
+type FundingBankCard struct {
+	MaskedPan      string   `json:"MaskedPan,omitempty"`
+	BankCardType   CardType `json:"BankCardType,omitempty"`
+	ValidThruYear  string   `json:"ValidThruYear,omitempty"`
+	ValidThruMonth string   `json:"ValidThruMonth,omitempty"`
 }
 
 type FundingInformation struct {
-	AuthorizationCode string
-	BankCard          BankCardType
+	BankCard          *FundingBankCard  `json:"BankCard,omitempty"`
+	AuthorizationCode string            `json:"AuthorizationCode,omitempty"`
+	ProcessResult     CardProcessResult `json:"ProcessResult,omitempty"`
 }
 
+// CardProcessResult represents the documented outcomes of a card funding attempt.
+type CardProcessResult string
+
+const (
+	CardProcessResultSuccessful                 CardProcessResult = "Successful"
+	CardProcessResultProblemWithCard            CardProcessResult = "ProblemWithCard"
+	CardProcessResultLowFunds                   CardProcessResult = "LowFunds"
+	CardProcessResultLostOrStolenCard           CardProcessResult = "LostOrStolenCard"
+	CardProcessResultDeclined                   CardProcessResult = "Declined"
+	CardProcessResultFraudulentTransaction      CardProcessResult = "FraudulentTransaction"
+	CardProcessResultCardSystemError            CardProcessResult = "CardSystemError"
+	CardProcessResultScaSoftDeclined            CardProcessResult = "ScaSoftDeclined"
+	CardProcessResultFailedDuringAuthentication CardProcessResult = "FailedDuringAuthentication"
+	CardProcessResultCardNotSupported           CardProcessResult = "CardNotSupported"
+	CardProcessResultUnknown                    CardProcessResult = "Unknown"
+	CardProcessResultThreeDsNotEnabled          CardProcessResult = "ThreeDsNotEnabled"
+)
+
 type PaymentState struct {
-	PaymentID             string `json:"PaymentId"`
-	PaymentRequestID      string `json:"PaymentRequestId`
-	POSId                 string
-	POSName               string
-	POSOwnerEmail         string
-	Status                PaymentStatus
-	PaymentType           PaymentType
-	AllowedFundingSources *[]FundingSource `json:"FundingSources,omitempty"`
-	FundingSource         *FundingSource
-	FundingInformation    *FundingInformation
-	GuestCheckout         bool
-	CreatedAt             *time.Time
-	StartedAt             *time.Time
-	CompletedAt           *time.Time
-	ValidUntil            *time.Time
-	ReservedUntil         *time.Time
-	DelayedCaptureUntil   *time.Time
-	Total                 decimal.Decimal
-	Currency              *Currency
-	SuggestedLocale       *Locale
-	FraudRiskScore        decimal.Decimal
-	CallbackURL           string `json:"CallbackUrl"`
-	RedirectURL           string `json:"RedirectUrl"`
+	PaymentID             string                       `json:"PaymentId"`
+	PaymentRequestID      string                       `json:"PaymentRequestId"`
+	OrderNumber           *string                      `json:"OrderNumber,omitempty"`
+	POSId                 string                       `json:"POSId,omitempty"`
+	POSName               string                       `json:"POSName,omitempty"`
+	POSOwnerEmail         string                       `json:"POSOwnerEmail,omitempty"`
+	POSOwnerCountry       string                       `json:"POSOwnerCountry,omitempty"`
+	Status                PaymentStatus                `json:"Status,omitempty"`
+	PaymentType           PaymentType                  `json:"PaymentType,omitempty"`
+	AllowedFundingSources []FundingSources             `json:"AllowedFundingSources,omitempty"`
+	FundingSource         *FundingSources              `json:"FundingSource,omitempty"`
+	FundingInformation    *FundingInformation          `json:"FundingInformation,omitempty"`
+	RecurrenceType        RecurrenceType               `json:"RecurrenceType,omitempty"`
+	TraceID               string                       `json:"TraceId,omitempty"`
+	GuestCheckout         bool                         `json:"GuestCheckout,omitempty"`
+	CreatedAt             *time.Time                   `json:"CreatedAt,omitempty"`
+	CompletedAt           *time.Time                   `json:"CompletedAt,omitempty"`
+	ValidUntil            *time.Time                   `json:"ValidUntil,omitempty"`
+	ReservedUntil         *time.Time                   `json:"ReservedUntil,omitempty"`
+	DelayedCaptureUntil   *time.Time                   `json:"DelayedCaptureUntil,omitempty"`
+	Transactions          []DetailedPaymentTransaction `json:"Transactions,omitempty"`
+	Total                 decimal.Decimal              `json:"Total,omitempty"`
+	Currency              Currency                     `json:"Currency,omitempty"`
+	SuggestedLocale       *Locale                      `json:"SuggestedLocale,omitempty"`
+	FraudRiskScore        *int                         `json:"FraudRiskScore,omitempty"`
+	CallbackURL           *string                      `json:"CallbackUrl,omitempty"`
+	RedirectURL           *string                      `json:"RedirectUrl,omitempty"`
+	Errors                []barionError                `json:"Errors,omitempty"`
+	PaymentMethod         PaymentMethod                `json:"PaymentMethod,omitempty"`
 }

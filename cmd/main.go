@@ -1,89 +1,108 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
+	"os"
 	"sync"
 
+	"github.com/csibe1999/go-barion/pkg/barion"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-resty/resty/v2"
-	. "github.com/miklosn/go-barion/pkg/barion"
 	"github.com/namsral/flag"
+	"github.com/shopspring/decimal"
 )
 
 func main() {
 	var (
-		baseurl string
-		poskey  string
+		baseURL string
+		posKey  string
 	)
-	flag.StringVar(&baseurl, "baseurl", "https://api.test.barion.com/v2", "base url")
-	flag.StringVar(&poskey, "poskey", "", "pos key")
+
+	flag.StringVar(&baseURL, "baseurl", "https://api.test.barion.com/v2", "Barion API base URL")
 	flag.Parse()
+	posKey, _ = os.LookupEnv("BARION_POS_KEY")
+	platformEmail, _ := os.LookupEnv("PLATFORM_EMAIL")
+	merchantEmail, _ := os.LookupEnv("MERCHANT_EMAIL")
+	buyerEmail, _ := os.LookupEnv("BUYER_EMAIL")
 
 	c := resty.New()
 	c.SetDebug(true)
-	barion := NewClient(baseurl, poskey, c)
-	barion.SetLogger(log.Print)
-	r := chi.NewRouter()
-	r.Use(middleware.RequestID)
-	r.Use(middleware.RealIP)
-	r.Use(middleware.Recoverer)
-	r.Post("/callback", barion.CallbackHandler(func(state *PaymentState) {
+	client := barion.NewClient(baseURL, posKey, c)
+	client.SetLogger(log.Print)
+
+	router := chi.NewRouter()
+	router.Use(middleware.RequestID)
+	router.Use(middleware.RealIP)
+	router.Use(middleware.Recoverer)
+	router.Post("/callback", client.CallbackHandler(func(state *barion.PaymentState) {
 		log.Printf("PaymentState callback result: %v", state)
 	}))
+
 	wg := new(sync.WaitGroup)
 	wg.Add(1)
+
 	go func() {
-		err := http.ListenAndServe(":3000", r)
-		log.Println(err)
-		wg.Done()
+		defer wg.Done()
+		if err := http.ListenAndServe(":3000", router); err != nil {
+			log.Println(err)
+		}
 	}()
-	/*
-		 := PaymentRequest{
-			POSKey:           "c25fb8a5685f459482bb3ce47c732bd4-",
-			PaymentType:      Immediate,
-			PaymentRequestId: "EXMPLSHOP-PM-001",
-			FundingSources:   []FundingSource{All},
-			Currency:         HUF,
-			Locale:           HU,
-			GuestCheckout:    true,
-			RedirectUrl:      "https://example.com/test",
-			Transactions: &[]PaymentTransaction{
-				{
-					POSTransactionId: "EXMPLSHOP-PM-001/TR001",
-					Payee:            "miklos.niedermayer@cray.one",
-					Total:            decimal.NewFromInt(37),
-					Comment:          "A brief description of the transaction",
-					Items: []Item{
-						{
-							Name:        "iPhone 7 smart case",
-							Description: "Durable elegant phone case / matte black",
-							Quantity:    decimal.NewFromInt(1),
-							Unit:        "piece",
-							UnitPrice:   decimal.NewFromInt(37),
-							ItemTotal:   decimal.NewFromInt(37),
-							SKU:         "EXMPLSHOP/SKU/PHC-01",
-						},
+
+	payment := barion.PaymentRequest{
+		POSKey:           posKey,
+		PaymentType:      barion.Immediate,
+		GuestCheckout:    true,
+		PaymentRequestID: "fa-01",
+		PayerHint:        buyerEmail,
+		RedirectURL:      "https://merchanturl/Redirect?paymentId=xyz",
+		CallbackURL:      "https://merchanturl/Callback?paymentId=xyz",
+		Locale:           barion.HU,
+		Currency:         barion.HUF,
+		FundingSources:   []barion.FundingSources{barion.All},
+		Transactions: []barion.PaymentTransaction{
+			{
+				POSTransactionID: "fa-01-01",
+				Payee:            merchantEmail,
+				Total:            decimal.NewFromInt(5000),
+				PayeeTransactions: []barion.PayeeTransaction{
+					{
+						POSTransactionID: "TR-01-01-01",
+						Payee:            platformEmail,
+						Total:            decimal.NewFromInt(500),
+						Comment:          "Marketplace commission: TR-01-01-01.",
+					},
+				},
+				Items: []barion.Item{
+					{
+						Name:        "English lesson",
+						Description: "Advanced Business English lesson from native speaker",
+						Quantity:    decimal.NewFromInt(2),
+						Unit:        "hour",
+						UnitPrice:   decimal.NewFromInt(2500),
+						ItemTotal:   decimal.NewFromInt(5000),
+						SKU:         "ENG-ADV-NTV",
 					},
 				},
 			},
-		}*/
+		},
+	}
 
-	/*
-		response, err := barion.PaymentRequest(context.TODO(), &m)
-		if err != nil {
-			log.Fatal(spew.Sdump(err))
-		}
-		spew.Dump(response)
-		log.Println(response.PaymentId)
+	response, err := client.StartPayment(context.TODO(), &payment)
+	if err != nil {
+		log.Fatal(spew.Sdump(err))
+	}
+	spew.Dump(response)
+	log.Println(response.PaymentID)
 
-		paymentState, err := barion.GetPaymentState(context.TODO(), response.PaymentId)
-		if err != nil {
-			log.Fatal(spew.Sdump(err))
-		}
-		spew.Dump(paymentState)
-	*/
+	paymentState, err := client.GetPaymentState(context.TODO(), response.PaymentID)
+	if err != nil {
+		log.Fatal(spew.Sdump(err))
+	}
+	spew.Dump(paymentState)
 
 	wg.Wait()
 }
