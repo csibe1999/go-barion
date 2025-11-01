@@ -25,7 +25,6 @@ func getC() Client {
 }
 
 func (c Client) New(request *barion.PaymentRequest) (*barion.PaymentRequestResponse, error) {
-	fmt.Println("-----------", c.postKey)
 	request.POSKey = c.postKey
 	response, err := c.StartPayment(request)
 	return response, err
