@@ -12,19 +12,19 @@ import (
 type logger func(...interface{})
 
 type client struct {
-	poskey  string
-	baseurl string
-	r       *resty.Client
+	postKey string
+	baseUrl string
 	logger  logger
+	r       *resty.Client
 }
 
-func NewClient(baseurl string, poskey string, r *resty.Client) *client {
-	r.SetHeader("User-Agent", "github.com/csibe1999/go-barion")
+func NewClient(baseUrl string, postKey string) *client {
+	r := resty.New()
 	return &client{
-		r:       r,
-		baseurl: baseurl,
-		poskey:  poskey,
+		baseUrl: baseUrl,
+		postKey: postKey,
 		logger:  log.Print,
+		r:       r,
 	}
 }
 
@@ -33,9 +33,8 @@ func (c *client) SetLogger(logger logger) {
 }
 
 func (c *client) StartPayment(ctx context.Context, request *PaymentRequest) (*PaymentRequestResponse, error) {
-	url := c.baseurl + "/Payment/Start"
-	request.POSKey = c.poskey
-	request.CallbackURL = "https://root-2c3992af.localhost.run/callback"
+	url := c.baseUrl + "/Payment/Start"
+	request.POSKey = c.postKey
 
 	body, err := json.Marshal(request)
 	if err != nil {
@@ -65,11 +64,11 @@ func (c *client) StartPayment(ctx context.Context, request *PaymentRequest) (*Pa
 }
 
 func (c *client) GetPaymentState(ctx context.Context, PaymentId string) (*PaymentState, error) {
-	url := c.baseurl + "/Payment/GetPaymentState"
+	url := c.baseUrl + "/Payment/GetPaymentState"
 	req := c.r.R()
 	req.SetContext(ctx)
 	req.SetHeader("Content-Type", "application/json")
-	req.SetQueryParam("POSKey", c.poskey)
+	req.SetQueryParam("POSKey", c.postKey)
 	req.SetQueryParam("PaymentId", PaymentId)
 	req.SetResult(PaymentState{})
 	req.SetError(ErrorResponse{})

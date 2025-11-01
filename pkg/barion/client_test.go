@@ -1,20 +1,17 @@
-package barion
+package barion_test
 
 import (
 	"testing"
 
-	"github.com/go-resty/resty/v2"
+	"github.com/csibe1999/go-barion/pkg/barion"
 	"github.com/jarcoal/httpmock"
 	"golang.org/x/net/context"
 )
 
 func TestPaymentRequestError(t *testing.T) {
-	c := resty.New()
-	//c.SetDebug(true)
-	httpmock.ActivateNonDefault(c.GetClient())
 	defer httpmock.DeactivateAndReset()
 
-	client := NewClient("http://localhost", "XXX", c)
+	client := barion.NewClient("http://localhost", "XXX")
 	response := httpmock.NewStringResponse(501, `
 			{
 			  "Errors": [
@@ -31,7 +28,7 @@ func TestPaymentRequestError(t *testing.T) {
 		`)
 	response.Header.Set("content-type", "application/json")
 	httpmock.RegisterResponder("POST", "http://localhost/Payment/Start", httpmock.ResponderFromResponse(response))
-	 res, err := client.StartPayment(context.Background(), &PaymentRequest{})
+	res, err := client.StartPayment(context.Background(), &barion.PaymentRequest{})
 	if err == nil {
 		t.Fatalf("Should be err")
 	}
@@ -41,12 +38,9 @@ func TestPaymentRequestError(t *testing.T) {
 }
 
 func TestPaymentRequestSuccess(t *testing.T) {
-	c := resty.New()
-	// c.SetDebug(true)
-	httpmock.ActivateNonDefault(c.GetClient())
 	defer httpmock.DeactivateAndReset()
 
-	client := NewClient("http://localhost", "xxx", c)
+	client := barion.NewClient("http://localhost", "xxx")
 	response := httpmock.NewStringResponse(200, `
 		{
 		  "PaymentId": "31dfdaff269e4aa0b7a12e1c0cc2f933",
@@ -72,7 +66,7 @@ func TestPaymentRequestSuccess(t *testing.T) {
 		`)
 	response.Header.Set("content-type", "application/json")
 	httpmock.RegisterResponder("POST", "http://localhost/Payment/Start", httpmock.ResponderFromResponse(response))
-	 res, err := client.StartPayment(context.Background(), &PaymentRequest{})
+	res, err := client.StartPayment(context.Background(), &barion.PaymentRequest{})
 	if err != nil {
 		t.Fatalf("Should not be err")
 	}
@@ -85,11 +79,9 @@ func TestPaymentRequestSuccess(t *testing.T) {
 }
 
 func TestGetPaymentState(t *testing.T) {
-	c := resty.New()
-	// c.SetDebug(true)
-	httpmock.ActivateNonDefault(c.GetClient())
 	defer httpmock.DeactivateAndReset()
-	client := NewClient("http://localhost", "xxx", c)
+
+	client := barion.NewClient("http://localhost", "xxx")
 	response := httpmock.NewStringResponse(200, `
 		{"PaymentId":"8a879c1fa4c9ea118bbd001dd8b71cc4","PaymentRequestId":"EXMPLSHOP-PM-001","OrderNumber":null,"POSId":"84717d42b27647c5bbb2bf3f6d7756f3","POSName":"Teszt 91","POSOwnerEmail":"miklos.niedermayer@cray.one","Status":"Prepared","PaymentType":"Immediate","FundingSource":null,"FundingInformation":null,"AllowedFundingSources":["All"],"GuestCheckout":true,"CreatedAt":"2020-07-19T09:42:14.021Z","ValidUntil":"2020-07-19T10:12:14.021Z","CompletedAt":null,"ReservedUntil":null,"DelayedCaptureUntil":null,"Transactions":[{"TransactionId":"8b879c1fa4c9ea118bbd001dd8b71cc4","POSTransactionId":"EXMPLSHOP-PM-001/TR001","TransactionTime":"2020-07-19T09:42:14.021Z","Total":37.00,"Currency":"HUF","Payer":null,"Payee":{"Name":{"LoginName":"miklos.niedermayer@cray.one","FirstName":"Miklós","LastName":"Niedermayer","OrganizationName":null},"Email":"miklos.niedermayer@cray.one"},"Comment":"A brief description of the transaction","Status":"Prepared","TransactionType":"Unspecified","Items":[{"Name":"iPhone 7 smart case","Description":"Durable elegant phone case / matte black","Quantity":1.00,"Unit":"piece","UnitPrice":37.00,"ItemTotal":37.00,"SKU":"EXMPLSHOP/SKU/PHC-01"}],"RelatedId":null,"POSId":"84717d42b27647c5bbb2bf3f6d7756f3","PaymentId":"8a879c1fa4c9ea118bbd001dd8b71cc4"}],"Total":37.00,"SuggestedLocale":"hu-HU","FraudRiskScore":null,"RedirectUrl":"https://example.com/test?paymentId=8a879c1fa4c9ea118bbd001dd8b71cc4","CallbackUrl":null,"Currency":"HUF","Errors":[]}
 	`)

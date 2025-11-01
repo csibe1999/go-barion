@@ -9,6 +9,7 @@ require (
 	github.com/go-resty/resty/v2 v2.3.0
 	github.com/golangci/golangci-lint v1.28.3 // indirect
 	github.com/jarcoal/httpmock v1.0.5
+	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/leekchan/timeutil v0.0.0-20150802142658-28917288c48d
 	github.com/mattn/go-shellwords v1.0.10 // indirect
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d // indirect

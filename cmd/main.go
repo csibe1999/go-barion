@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -11,7 +12,7 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	"github.com/go-resty/resty/v2"
+	"github.com/joho/godotenv"
 	"github.com/namsral/flag"
 	"github.com/shopspring/decimal"
 )
@@ -24,14 +25,19 @@ func main() {
 
 	flag.StringVar(&baseURL, "baseurl", "https://api.test.barion.com/v2", "Barion API base URL")
 	flag.Parse()
-	posKey, _ = os.LookupEnv("BARION_POS_KEY")
-	platformEmail, _ := os.LookupEnv("PLATFORM_EMAIL")
-	merchantEmail, _ := os.LookupEnv("MERCHANT_EMAIL")
-	buyerEmail, _ := os.LookupEnv("BUYER_EMAIL")
 
-	c := resty.New()
-	c.SetDebug(true)
-	client := barion.NewClient(baseURL, posKey, c)
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	posKey = os.Getenv("BARION_POS_KEY")
+	platformEmail := os.Getenv("PLATFORM_EMAIL")
+	merchantEmail := os.Getenv("MERCHANT_EMAIL")
+	buyerEmail := os.Getenv("BUYER_EMAIL")
+	callbackURL := os.Getenv("CALLBACK_URL")
+
+	client := barion.NewClient(baseURL, posKey)
 	client.SetLogger(log.Print)
 
 	router := chi.NewRouter()
@@ -41,6 +47,10 @@ func main() {
 	router.Post("/callback", client.CallbackHandler(func(state *barion.PaymentState) {
 		log.Printf("PaymentState callback result: %v", state)
 	}))
+	router.Get("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+	})
 
 	wg := new(sync.WaitGroup)
 	wg.Add(1)
@@ -59,7 +69,7 @@ func main() {
 		PaymentRequestID: "fa-01",
 		PayerHint:        buyerEmail,
 		RedirectURL:      "https://merchanturl/Redirect?paymentId=xyz",
-		CallbackURL:      "https://merchanturl/Callback?paymentId=xyz",
+		CallbackURL:      callbackURL,
 		Locale:           barion.HU,
 		Currency:         barion.HUF,
 		FundingSources:   []barion.FundingSources{barion.All},
@@ -90,18 +100,22 @@ func main() {
 			},
 		},
 	}
+	_ = payment
 
 	response, err := client.StartPayment(context.TODO(), &payment)
 	if err != nil {
 		log.Fatal(spew.Sdump(err))
 	}
 	spew.Dump(response)
+	fmt.Println("????????????????????")
 	log.Println(response.PaymentID)
+	fmt.Println("????????????????????")
 
 	paymentState, err := client.GetPaymentState(context.TODO(), response.PaymentID)
 	if err != nil {
 		log.Fatal(spew.Sdump(err))
 	}
+	fmt.Println("????????????????????")
 	spew.Dump(paymentState)
 
 	wg.Wait()
