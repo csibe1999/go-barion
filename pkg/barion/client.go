@@ -33,7 +33,7 @@ func (c *client) SetLogger(logger logger) {
 }
 
 func (c *client) StartPayment(ctx context.Context, request *PaymentRequest) (*PaymentRequestResponse, error) {
-	url := c.baseUrl + "/Payment/Start"
+	url := c.baseUrl + "/v2/Payment/Start"
 	request.POSKey = c.postKey
 
 	body, err := json.Marshal(request)
@@ -64,7 +64,7 @@ func (c *client) StartPayment(ctx context.Context, request *PaymentRequest) (*Pa
 }
 
 func (c *client) GetPaymentState(ctx context.Context, PaymentId string) (*PaymentState, error) {
-	url := c.baseUrl + "/Payment/GetPaymentState"
+	url := c.baseUrl + fmt.Sprintf("/v4/payment/%s/paymentstate", PaymentId)
 	req := c.r.R()
 	req.SetContext(ctx)
 	req.SetHeader("Content-Type", "application/json")
