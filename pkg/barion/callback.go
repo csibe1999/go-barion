@@ -6,11 +6,7 @@ import (
 	"net/http"
 )
 
-type callbackRequest struct {
-	PaymentId string
-}
-
-func (c *client) CallbackHandler(paymentStateHandler func(state *PaymentState)) http.HandlerFunc {
+func (c *Client) CallbackHandler(paymentStateHandler func(state *PaymentState)) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		keys, ok := r.URL.Query()["paymentId"]
 

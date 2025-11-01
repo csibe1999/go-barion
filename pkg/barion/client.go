@@ -11,16 +11,16 @@ import (
 
 type logger func(...interface{})
 
-type client struct {
+type Client struct {
 	postKey string
 	baseUrl string
 	logger  logger
 	r       *resty.Client
 }
 
-func NewClient(baseUrl string, postKey string) *client {
+func NewClient(baseUrl string, postKey string) *Client {
 	r := resty.New()
-	return &client{
+	return &Client{
 		baseUrl: baseUrl,
 		postKey: postKey,
 		logger:  log.Print,
@@ -28,11 +28,11 @@ func NewClient(baseUrl string, postKey string) *client {
 	}
 }
 
-func (c *client) SetLogger(logger logger) {
+func (c *Client) SetLogger(logger logger) {
 	c.logger = logger
 }
 
-func (c *client) StartPayment(ctx context.Context, request *PaymentRequest) (*PaymentRequestResponse, error) {
+func (c *Client) StartPayment(ctx context.Context, request *PaymentRequest) (*PaymentRequestResponse, error) {
 	url := c.baseUrl + "/v2/Payment/Start"
 	request.POSKey = c.postKey
 
@@ -63,7 +63,7 @@ func (c *client) StartPayment(ctx context.Context, request *PaymentRequest) (*Pa
 	return res.Result().(*PaymentRequestResponse), nil
 }
 
-func (c *client) GetPaymentState(ctx context.Context, PaymentId string) (*PaymentState, error) {
+func (c *Client) GetPaymentState(ctx context.Context, PaymentId string) (*PaymentState, error) {
 	url := c.baseUrl + fmt.Sprintf("/v4/payment/%s/paymentstate", PaymentId)
 	req := c.r.R()
 	req.SetContext(ctx)
