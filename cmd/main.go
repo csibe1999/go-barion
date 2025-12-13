@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/csibe1999/go-barion/pkg/barion"
 	"github.com/csibe1999/go-barion/pkg/barion/callback"
@@ -19,6 +20,8 @@ import (
 
 func main() {
 
+	now := time.Now()
+
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
@@ -30,10 +33,12 @@ func main() {
 	merchantEmail := os.Getenv("MERCHANT_EMAIL")
 	buyerEmail := os.Getenv("BUYER_EMAIL")
 	callbackURL := os.Getenv("CALLBACK_URL")
+	redirectURL := os.Getenv("REDIRECT_URL")
 
 	barion.POSKey = posKey
 	barion.BaseUrl = baseUrl
 	barion.CallbackUrl = callbackURL
+	barion.RedirectUrl = redirectURL
 
 	router := chi.NewRouter()
 	router.Use(middleware.RequestID)
@@ -64,8 +69,8 @@ func main() {
 		GuestCheckout:    true,
 		PaymentRequestID: "fa-01",
 		PayerHint:        buyerEmail,
-		RedirectURL:      "https://merchanturl/Redirect?paymentId=xyz",
-		CallbackURL:      callbackURL,
+		RedirectURL:      barion.RedirectUrl,
+		CallbackURL:      barion.CallbackUrl,
 		Locale:           barion.HU,
 		Currency:         barion.HUF,
 		FundingSources:   []barion.FundingSources{barion.All},
@@ -110,6 +115,9 @@ func main() {
 		log.Fatal(spew.Sdump(err))
 	}
 	spew.Dump(paymentState)
+
+	now2 := time.Now()
+	log.Printf("Elapsed time: %s", now2.Sub(now).String())
 
 	wg.Wait()
 }

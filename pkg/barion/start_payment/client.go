@@ -9,9 +9,11 @@ import (
 )
 
 type Client struct {
-	postKey string
-	baseUrl string
-	r       *resty.Client
+	postKey     string
+	baseUrl     string
+	redirectUrl string
+	callbackUrl string
+	r           *resty.Client
 }
 
 // Creates a Checkout Session object.
@@ -21,11 +23,10 @@ func New(request *barion.PaymentRequest) (*barion.PaymentRequestResponse, error)
 }
 
 func getC() Client {
-	return Client{postKey: barion.POSKey, baseUrl: barion.BaseUrl, r: resty.New()}
+	return Client{postKey: barion.POSKey, baseUrl: barion.BaseUrl, redirectUrl: barion.RedirectUrl, callbackUrl: barion.CallbackUrl, r: resty.New()}
 }
 
 func (c Client) New(request *barion.PaymentRequest) (*barion.PaymentRequestResponse, error) {
-	request.POSKey = c.postKey
 	response, err := c.StartPayment(request)
 	return response, err
 }
@@ -33,6 +34,8 @@ func (c Client) New(request *barion.PaymentRequest) (*barion.PaymentRequestRespo
 func (c *Client) StartPayment(request *barion.PaymentRequest) (*barion.PaymentRequestResponse, error) {
 	url := c.baseUrl + "/v2/Payment/Start"
 	request.POSKey = c.postKey
+	request.CallbackURL = c.callbackUrl
+	request.RedirectURL = c.redirectUrl
 
 	body, err := json.Marshal(request)
 	if err != nil {
