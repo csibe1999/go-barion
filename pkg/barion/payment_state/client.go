@@ -29,6 +29,9 @@ func (c Client) New(PaymentId string) (*barion.PaymentState, error) {
 func (c *Client) GetPaymentState(PaymentId string) (*barion.PaymentState, error) {
 	url := fmt.Sprintf("%s/v4/payment/%s/paymentstate", c.baseUrl, PaymentId)
 
+	fmt.Println(url)
+	fmt.Println(c.baseUrl)
+
 	req := c.r.R()
 	req.SetHeader("Content-Type", "application/json")
 	req.SetHeader("x-pos-key", c.postKey)
