@@ -4,15 +4,16 @@ package barion
 type PaymentStatus string
 
 const (
-	Prepared           PaymentStatus = "Prepared"
-	Started            PaymentStatus = "Started"
-	InProgress         PaymentStatus = "InProgress"
-	Waiting            PaymentStatus = "Waiting"
-	Reserved           PaymentStatus = "Reserved"
-	Authorized         PaymentStatus = "Authorized"
-	Canceled           PaymentStatus = "Canceled"
-	Succeeded          PaymentStatus = "Succeeded"
-	Failed             PaymentStatus = "Failed"
-	PartiallySucceeded PaymentStatus = "PartiallySucceeded"
-	Expired            PaymentStatus = "Expired"
+	PaymentStatusPrepared           PaymentStatus = "Prepared"
+	PaymentStatusStarted            PaymentStatus = "Started"
+	PaymentStatusInProgress         PaymentStatus = "InProgress"
+	PaymentStatusWaiting            PaymentStatus = "Waiting"
+	PaymentStatusReserved           PaymentStatus = "Reserved"
+	PaymentStatusAuthorized         PaymentStatus = "Authorized"
+	PaymentStatusCanceled           PaymentStatus = "Canceled"
+	PaymentStatusSucceeded          PaymentStatus = "Succeeded"
+	PaymentStatusFailed             PaymentStatus = "Failed"
+	PaymentStatusPartiallySucceeded PaymentStatus = "PartiallySucceeded"
+	PaymentStatusExpired            PaymentStatus = "Expired"
+	PaymentStatusError              PaymentStatus = "Error"
 )
