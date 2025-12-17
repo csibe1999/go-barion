@@ -58,7 +58,7 @@ func (c *Client) StartPayment(request *barion.PaymentRequest) (*barion.PaymentRe
 			x := res.Error().(*barion.ErrorResponse)
 			x.Status = res.Status()
 		}
-		return nil, fmt.Errorf("Error sending payment request %v: %s", request, res.Error().(*barion.ErrorResponse))
+		return nil, fmt.Errorf("Error sending payment request %v: %v", request, res.Error().(*barion.ErrorResponse))
 	}
 	return res.Result().(*barion.PaymentRequestResponse), nil
 }

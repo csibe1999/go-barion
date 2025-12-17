@@ -1,11 +1,12 @@
 package barion
 
-type RecurrenceType int
+// RecurrenceType represents the recurring payment type as defined by the Barion API.
+type RecurrenceType string
 
 const (
-	MerchantInitiatedPayment RecurrenceType = 0
-	OneClickPayment          RecurrenceType = 10
-	RecurringPayment         RecurrenceType = 20
+	MerchantInitiatedPayment RecurrenceType = "MerchantInitiatedPayment"
+	OneClickPayment          RecurrenceType = "OneClickPayment"
+	RecurringPayment         RecurrenceType = "RecurringPayment"
 )
 
 type RecurrenceResult string

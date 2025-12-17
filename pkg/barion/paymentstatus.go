@@ -1,18 +1,18 @@
 package barion
 
-//go:generate enumer -type=PaymentStatus -json
-type PaymentStatus int
+// PaymentStatus enumerates the possible payment states as defined by the Barion API.
+type PaymentStatus string
 
 const (
-	Prepared           PaymentStatus = 10
-	Started            PaymentStatus = 20
-	InProgress         PaymentStatus = 21
-	Waiting            PaymentStatus = 22
-	Reserved           PaymentStatus = 25
-	Authorized         PaymentStatus = 26
-	Canceled           PaymentStatus = 30
-	Succeeded          PaymentStatus = 40
-	Failed             PaymentStatus = 50
-	PartiallySucceeded PaymentStatus = 60
-	Expired            PaymentStatus = 70
+	Prepared           PaymentStatus = "Prepared"
+	Started            PaymentStatus = "Started"
+	InProgress         PaymentStatus = "InProgress"
+	Waiting            PaymentStatus = "Waiting"
+	Reserved           PaymentStatus = "Reserved"
+	Authorized         PaymentStatus = "Authorized"
+	Canceled           PaymentStatus = "Canceled"
+	Succeeded          PaymentStatus = "Succeeded"
+	Failed             PaymentStatus = "Failed"
+	PartiallySucceeded PaymentStatus = "PartiallySucceeded"
+	Expired            PaymentStatus = "Expired"
 )

@@ -11,17 +11,18 @@ type paymentStateRequest struct {
 	PaymentID string `json:"PaymentId"`
 }
 
-type CardType int
+// CardType represents the bank card type as defined by the Barion API.
+type CardType string
 
 const (
-	CardTypeUnknown         CardType = 0
-	CardTypeMasterCard      CardType = 10
-	CardTypeVisa            CardType = 20
-	CardTypeAmericanExpress CardType = 30
-	CardTypeElectron        CardType = 40
-	CardTypeMaestro         CardType = 50
-	CardTypeDinersClub      CardType = 70
-	CardTypeDiscover        CardType = 80
+	CardTypeUnknown         CardType = "Unknown"
+	CardTypeMasterCard      CardType = "MasterCard"
+	CardTypeVisa            CardType = "Visa"
+	CardTypeAmericanExpress CardType = "AmericanExpress"
+	CardTypeElectron        CardType = "Electron"
+	CardTypeMaestro         CardType = "Maestro"
+	CardTypeDinersClub      CardType = "DinersClub"
+	CardTypeDiscover        CardType = "Discover"
 )
 
 type FundingBankCard struct {

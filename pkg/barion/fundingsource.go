@@ -1,13 +1,13 @@
 package barion
 
-//go:generate enumer -type=FundingSource -json
-type FundingSources int
+// FundingSources represents the possible funding sources for a Barion payment.
+type FundingSources string
 
 const (
-	All FundingSources = iota
-	Balance
-	BankCard
-	GooglePay
-	ApplePay
-	BankTransfer
+	All          FundingSources = "All"
+	Balance      FundingSources = "Balance"
+	BankCard     FundingSources = "BankCard"
+	GooglePay    FundingSources = "GooglePay"
+	ApplePay     FundingSources = "ApplePay"
+	BankTransfer FundingSources = "BankTransfer"
 )

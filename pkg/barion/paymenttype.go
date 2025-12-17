@@ -1,10 +1,10 @@
 package barion
 
-//go:generate enumer -type=PaymentType -json
-type PaymentType int
+// PaymentType enumerates the possible payment types as defined by the Barion API.
+type PaymentType string
 
 const (
-	Immediate PaymentType = iota
-	Reservation
-	DelayedCapture
+	Immediate      PaymentType = "Immediate"
+	Reservation    PaymentType = "Reservation"
+	DelayedCapture PaymentType = "DelayedCapture"
 )
