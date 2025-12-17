@@ -29,9 +29,6 @@ func (c Client) New(PaymentId string) (*barion.PaymentState, error) {
 func (c *Client) GetPaymentState(PaymentId string) (*barion.PaymentState, error) {
 	url := fmt.Sprintf("%s/v4/payment/%s/paymentstate", c.baseUrl, PaymentId)
 
-	fmt.Println(url)
-	fmt.Println(c.baseUrl)
-
 	req := c.r.R()
 	req.SetHeader("Content-Type", "application/json")
 	req.SetHeader("x-pos-key", c.postKey)
@@ -39,15 +36,15 @@ func (c *Client) GetPaymentState(PaymentId string) (*barion.PaymentState, error)
 	req.SetError(barion.ErrorResponse{})
 	res, err := req.Get(url)
 	if err != nil {
-		return nil, fmt.Errorf("Error getting payment state for payment id %s: %v", PaymentId, err)
+		return nil, fmt.Errorf("error getting payment state for payment id %s: %v", PaymentId, err)
 	}
 	if res.IsError() {
 		if res.Error() != nil {
 			x := res.Error().(*barion.ErrorResponse)
 			x.Status = res.Status()
-			return nil, fmt.Errorf("Error getting payment state for payment id %s: %v", PaymentId, res.Error())
+			return nil, fmt.Errorf("error getting payment state for payment id %s: %v", PaymentId, res.Error())
 		}
-		return nil, fmt.Errorf("Error getting payment state for payment id %s: %v", PaymentId, &barion.ErrorResponse{
+		return nil, fmt.Errorf("error getting payment state for payment id %s: %v", PaymentId, &barion.ErrorResponse{
 			Status: res.Status(),
 		})
 	}

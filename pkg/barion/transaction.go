@@ -1,7 +1,6 @@
 package barion
 
 import (
-	"encoding/json"
 	"time"
 
 	"github.com/shopspring/decimal"
@@ -60,61 +59,6 @@ type ProcessedTransaction struct {
 	Currency         Currency          `json:"Currency,omitempty"`
 	TransactionTime  string            `json:"TransactionTime,omitempty"`
 	RelatedID        *string           `json:"RelatedId,omitempty"`
-}
-
-func (pt *ProcessedTransaction) UnmarshalJSON(data []byte) error {
-	type processedTransactionAlias struct {
-		POSTransactionID string            `json:"POSTransactionId,omitempty"`
-		TransactionID    string            `json:"TransactionId,omitempty"`
-		Status           TransactionStatus `json:"Status,omitempty"`
-		Currency         Currency          `json:"Currency,omitempty"`
-		TransactionTime  string            `json:"TransactionTime,omitempty"`
-	}
-
-	var aux struct {
-		processedTransactionAlias
-		RelatedID *json.RawMessage `json:"RelatedId"`
-	}
-
-	if err := json.Unmarshal(data, &aux); err != nil {
-		return err
-	}
-
-	pt.POSTransactionID = aux.POSTransactionID
-	pt.TransactionID = aux.TransactionID
-	pt.Status = aux.Status
-	pt.Currency = aux.Currency
-	pt.TransactionTime = aux.TransactionTime
-
-	if aux.RelatedID == nil {
-		pt.RelatedID = nil
-		return nil
-	}
-
-	raw := *aux.RelatedID
-	if string(raw) == "null" {
-		pt.RelatedID = nil
-		return nil
-	}
-
-	if len(raw) > 0 && raw[0] == '"' {
-		var related string
-		if err := json.Unmarshal(raw, &related); err != nil {
-			return err
-		}
-		pt.RelatedID = &related
-		return nil
-	}
-
-	var number json.Number
-	if err := json.Unmarshal(raw, &number); err != nil {
-		return err
-	}
-
-	related := number.String()
-	pt.RelatedID = &related
-
-	return nil
 }
 
 // DetailedPaymentTransaction mirrors the documentation for PaymentState responses.
