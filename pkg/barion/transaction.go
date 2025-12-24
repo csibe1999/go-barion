@@ -1,10 +1,30 @@
 package barion
 
 import (
+	"encoding/json"
+	"strconv"
 	"time"
 
 	"github.com/shopspring/decimal"
 )
+
+// relatedIDString converts interface-typed RelatedId responses into a string.
+func relatedIDString(v interface{}) string {
+	switch val := v.(type) {
+	case string:
+		return val
+	case json.Number:
+		return val.String()
+	case float64:
+		return strconv.FormatInt(int64(val), 10)
+	case int64:
+		return strconv.FormatInt(val, 10)
+	case int:
+		return strconv.Itoa(val)
+	default:
+		return ""
+	}
+}
 
 // NameInformation describes a person's name block returned by the API.
 type NameInformation struct {
@@ -58,7 +78,12 @@ type ProcessedTransaction struct {
 	Status           TransactionStatus `json:"Status,omitempty"`
 	Currency         Currency          `json:"Currency,omitempty"`
 	TransactionTime  string            `json:"TransactionTime,omitempty"`
-	RelatedID        *string           `json:"RelatedId,omitempty"`
+	RelatedID        interface{}       `json:"RelatedId,omitempty"`
+}
+
+// RelatedIDString returns RelatedId as string, handling numeric payloads.
+func (p ProcessedTransaction) RelatedIDString() string {
+	return relatedIDString(p.RelatedID)
 }
 
 // DetailedPaymentTransaction mirrors the documentation for PaymentState responses.
@@ -74,5 +99,10 @@ type DetailedPaymentTransaction struct {
 	Status           TransactionStatus `json:"Status,omitempty"`
 	TransactionType  TransactionType   `json:"TransactionType,omitempty"`
 	Items            []Item            `json:"Items,omitempty"`
-	RelatedID        *string           `json:"RelatedId,omitempty"`
+	RelatedID        interface{}       `json:"RelatedId,omitempty"`
+}
+
+// RelatedIDString returns RelatedId as string, handling numeric payloads.
+func (d DetailedPaymentTransaction) RelatedIDString() string {
+	return relatedIDString(d.RelatedID)
 }
